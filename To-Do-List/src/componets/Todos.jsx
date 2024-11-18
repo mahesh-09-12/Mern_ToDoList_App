@@ -40,15 +40,13 @@ const Todos = () => {
   };
 
   const handleEdit = async (id) => {
-    const updatedTodos = todos.map((todo) =>
-      todo._id === id ? { ...todo, completed: !todo.completed } : todo
-    );
-    setTodos(updatedTodos);
     try {
-      await axios.put(`http://localhost:3000/update/${id}`, {
+      const response = await axios.put(`http://localhost:3000/update/${id}`, {
         completed: !todos.find((todo) => todo._id === id).completed,
       });
-    } catch (err) {
+      const updatedTodos = response.data;
+      setTodos(updatedTodos);
+    } catch (error) {
       console.log(err);
     }
   };
