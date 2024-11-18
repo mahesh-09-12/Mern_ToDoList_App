@@ -13,13 +13,14 @@ const Todos = () => {
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedText, setEditedText] = useState("");
 
-  useEffect(() => {
+  useEffect((e) => {
     const fetchTodos = async () => {
       try {
         const result = await axios.get("http://localhost:3000/get");
+        console.log(result.data);
         setTodos(result.data);
       } catch (err) {
-        console.log(err);
+        console.error("Error fetching todos:", err);
       }
     };
     fetchTodos();
@@ -44,9 +45,13 @@ const Todos = () => {
       const response = await axios.put(`http://localhost:3000/update/${id}`, {
         completed: !todos.find((todo) => todo._id === id).completed,
       });
-      const updatedTodos = response.data;
-      setTodos(updatedTodos);
-    } catch (error) {
+      const updatedTodo = response.data;
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) =>
+          todo._id === id ? { ...todo, completed: updatedTodo.completed } : todo
+        )
+      );
+    } catch (err) {
       console.log(err);
     }
   };
@@ -112,21 +117,23 @@ const Todos = () => {
           </button>
         </div>
         <div className="w-full mt-5">
-          {todos.length === 0 ? (
+          {Array.isArray(todos) && todos.length === 0 ? (
             <h2>No todos to display</h2>
           ) : (
+            Array.isArray(todos) &&
             todos.map((todo) => {
               return (
                 <div
                   key={todo._id}
                   className="flex justify-between items-center w-full h-auto p-5 my-4 bg-gradient-to-tl from-cyan-200 to-black/[0.6] rounded-lg text-white overflow-hidden"
-                  onClick={() => handleEdit(todo._id)}
                 >
                   <div className="flex gap-3 items-center flex-1">
                     {todo.completed ? (
-                      <BsFillCheckCircleFill />
+                      <BsFillCheckCircleFill
+                        onClick={() => handleEdit(todo._id)}
+                      />
                     ) : (
-                      <BsCircleFill />
+                      <BsCircleFill onClick={() => handleEdit(todo._id)} />
                     )}
                     {editingTaskId === todo._id ? (
                       <input
